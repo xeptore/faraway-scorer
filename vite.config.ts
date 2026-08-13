@@ -1,6 +1,6 @@
 import { svelte } from '@sveltejs/vite-plugin-svelte'
-import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   plugins: [

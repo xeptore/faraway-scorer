@@ -1,0 +1,71 @@
+import { BIOMES, RESOURCES, type Biome, type Resource } from './cards'
+
+export const REGION_POSITIONS = [8, 7, 6, 5, 4, 3, 2, 1] as const
+export const MIN_PLAYERS = 2
+export const MAX_PLAYERS = 7
+
+export type RegionSequence = [
+  number | null,
+  number | null,
+  number | null,
+  number | null,
+  number | null,
+  number | null,
+  number | null,
+  number | null
+]
+
+export interface SanctuaryState {
+  resources: Record<Resource, number>
+  biomes: Record<Biome, number>
+  clues: number
+  nighttimeCards: number
+  fame: number
+}
+
+export interface Player {
+  id: string
+  name: string
+  sanctuary: SanctuaryState
+  /** Scoring order: index 0 is the 8th Region played; index 7 is the 1st. */
+  regions: RegionSequence
+}
+
+export interface Game {
+  id: string
+  players: Player[]
+  activePlayerId: string | null
+  screen: 'scoring' | 'results'
+}
+
+const zeroRecord = <T extends readonly string[]>(keys: T): Record<T[number], number> =>
+  Object.fromEntries(keys.map((key) => [key, 0])) as Record<T[number], number>
+
+export function createSanctuaryState(): SanctuaryState {
+  return {
+    resources: zeroRecord(RESOURCES),
+    biomes: zeroRecord(BIOMES),
+    clues: 0,
+    nighttimeCards: 0,
+    fame: 0
+  }
+}
+
+export function createPlayer(name: string, id: string = crypto.randomUUID()): Player {
+  return {
+    id,
+    name: name.trim(),
+    sanctuary: createSanctuaryState(),
+    regions: [null, null, null, null, null, null, null, null]
+  }
+}
+
+export function createGame(names: readonly string[], id: string = crypto.randomUUID()): Game {
+  const players = names.map((name) => createPlayer(name))
+  return {
+    id,
+    players,
+    activePlayerId: players[0]?.id ?? null,
+    screen: 'scoring'
+  }
+}

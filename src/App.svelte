@@ -23,9 +23,30 @@
   const cardLookup = createRegionLookup(REGION_CARDS)
   const restoredGame = loadGame()
 
+  interface SetupPlayer {
+    id: string
+    name: string
+    placeholder: string
+  }
+
+  const playerNamePlaceholders = ['Ada', 'Alex', 'Casey', 'Charlie', 'Jordan', 'Morgan', 'Sam']
+
+  function createSetupPlayer(placeholder: string): SetupPlayer {
+    return { id: crypto.randomUUID(), name: '', placeholder }
+  }
+
+  function initialSetupPlayers(): SetupPlayer[] {
+    return [createSetupPlayer(playerNamePlaceholders[0]), createSetupPlayer(playerNamePlaceholders[1])]
+  }
+
+  function nextPlaceholder(players: readonly SetupPlayer[]): string {
+    const used = new Set(players.map((player) => player.placeholder))
+    return playerNamePlaceholders.find((placeholder) => !used.has(placeholder)) ?? playerNamePlaceholders[0]
+  }
+
   let game: Game | null = $state(restoredGame)
   let view: 'resume' | 'setup' | 'game' = $state(restoredGame ? 'resume' : 'setup')
-  let setupNames: string[] = $state(['Player 1', 'Player 2'])
+  let setupPlayers: SetupPlayer[] = $state(initialSetupPlayers())
   let trayExpanded = $state(false)
   let showNewGameConfirm = $state(false)
   let regionDrafts: Record<string, string> = $state({})
@@ -69,8 +90,8 @@
   })
 
   function startGame(): void {
-    const names = setupNames.map((name) => name.trim()).filter(Boolean)
-    if (names.length < MIN_PLAYERS) return
+    const names = setupPlayers.map((player) => player.name.trim())
+    if (names.some((name) => !name)) return
     game = createGame(names)
     regionDrafts = {}
     rawErrors = {}
@@ -78,7 +99,15 @@
   }
 
   function addPlayer(): void {
-    if (setupNames.length < MAX_PLAYERS) setupNames.push(`Player ${setupNames.length + 1}`)
+    if (setupPlayers.length < MAX_PLAYERS) {
+      setupPlayers.push(createSetupPlayer(nextPlaceholder(setupPlayers)))
+    }
+  }
+
+  function removePlayer(id: string): void {
+    if (setupPlayers.length > MIN_PLAYERS) {
+      setupPlayers = setupPlayers.filter((player) => player.id !== id)
+    }
   }
 
   function requestNewGame(): void {
@@ -89,7 +118,7 @@
   function resetToSetup(): void {
     clearGame()
     game = null
-    setupNames = ['Player 1', 'Player 2']
+    setupPlayers = initialSetupPlayers()
     regionDrafts = {}
     rawErrors = {}
     showNewGameConfirm = false
@@ -169,22 +198,28 @@
       <h1>Who made the journey?</h1>
       <p class="intro">Add 2–7 explorers. You can switch between them freely while scoring.</p>
       <div class="name-list">
-        {#each setupNames as name, index}
+        {#each setupPlayers as player, index (player.id)}
           <label>
             <span>Player {index + 1}</span>
             <div class="name-input-wrap">
-              <input type="text" maxlength="24" bind:value={setupNames[index]} autocomplete="off" />
-              {#if setupNames.length > MIN_PLAYERS}
-                <button type="button" aria-label={`Remove player ${index + 1}`} onclick={() => setupNames.splice(index, 1)}>×</button>
+              <input
+                type="text"
+                maxlength="24"
+                placeholder={`e.g. ${player.placeholder}`}
+                bind:value={player.name}
+                autocomplete="off"
+              />
+              {#if setupPlayers.length > MIN_PLAYERS}
+                <button type="button" aria-label={`Remove player ${index + 1}`} onclick={() => removePlayer(player.id)}>×</button>
               {/if}
             </div>
           </label>
         {/each}
       </div>
-      {#if setupNames.length < MAX_PLAYERS}
+      {#if setupPlayers.length < MAX_PLAYERS}
         <button class="add-button" type="button" onclick={addPlayer}><span>+</span> Add player</button>
       {/if}
-      <button class="primary-button" type="button" onclick={startGame} disabled={setupNames.filter((name) => name.trim()).length < MIN_PLAYERS}>Start scoring <span>→</span></button>
+      <button class="primary-button" type="button" onclick={startGame} disabled={setupPlayers.some((player) => !player.name.trim())}>Start scoring <span>→</span></button>
       <p class="local-note">Stored only on this device · Works offline</p>
     </section>
   </main>

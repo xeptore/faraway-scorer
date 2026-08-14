@@ -177,7 +177,7 @@
 {#if view === 'resume' && game}
   <main class="start-shell">
     <section class="start-card">
-      <div class="brand-mark"><span></span></div>
+      <img class="brand-mark" src="/icon-192x192.png" alt="" width="62" height="62" />
       <p class="eyebrow">Faraway scorekeeper</p>
       <h1>Your return journey is waiting.</h1>
       <p class="intro">Continue where you left off, with every Region and Sanctuary saved on this device.</p>
@@ -193,7 +193,7 @@
 {:else if view === 'setup'}
   <main class="start-shell">
     <section class="start-card setup-card">
-      <div class="brand-mark"><span></span></div>
+      <img class="brand-mark" src="/icon-192x192.png" alt="" width="62" height="62" />
       <p class="eyebrow">New game</p>
       <h1>Who made the journey?</h1>
       <p class="intro">Add 2–7 explorers. You can switch between them freely while scoring.</p>
@@ -226,7 +226,7 @@
 {:else if game && game.screen === 'results'}
   <main class="results-shell">
     <header class="app-header simple-header">
-      <div class="mini-brand"><span></span>Faraway</div>
+      <div class="mini-brand"><img src="/icon-192x192.png" alt="" />Faraway</div>
       <button class="header-action" type="button" onclick={requestNewGame}>New game</button>
     </header>
     <section class="results-card">
@@ -249,7 +249,7 @@
 {:else if game && activePlayer && activeScore}
   <div class="score-app">
     <header class="app-header">
-      <div class="mini-brand"><span></span>Faraway</div>
+      <div class="mini-brand"><img src="/icon-192x192.png" alt="" />Faraway</div>
       <div class="header-score"><span>{activeScore.complete ? 'Total fame' : 'Current fame'}</span><strong>{activeScore.totalFame}</strong></div>
       <button class="menu-button" type="button" aria-label="Start a new game" onclick={requestNewGame}>•••</button>
     </header>

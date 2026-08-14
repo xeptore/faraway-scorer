@@ -29,7 +29,7 @@
     "jsdom": "^30.0.1",
     "node": "26.7.0",
     "svelte-check": "^4.7.6",
-    "typescript": "^7.0.2",
+    "typescript": "^6.0.3",
     "vite": "^8.2.1",
     "vitest": "^4.1.10",
     "workbox-window": "^7.4.1"

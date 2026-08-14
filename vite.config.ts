@@ -17,7 +17,6 @@ export default defineConfig({
         'icon-192x192.png',
         'icon-384x384.png',
         'icon-512x512.png',
-        'icon.png',
       ],
       manifest: {
         name: 'Faraway Scorekeeper',
@@ -77,7 +76,7 @@ export default defineConfig({
             purpose: 'any maskable'
           },
           {
-            src: '/icon.png',
+            src: '/icon-512x512.png',
             sizes: 'any',
             type: 'image/png',
             purpose: 'any maskable'

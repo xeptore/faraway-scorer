@@ -15,13 +15,13 @@ export function explorationDuration(player: Player): number {
 /** Official tie-break: lowest total Exploration Duration among tied players. */
 export function rankPlayers(
   players: readonly Player[],
-  fameByPlayer: ReadonlyMap<string, number>
+  fameByPlayer: ReadonlyMap<string, number>,
 ): RankedPlayer[] {
   const sorted = players
     .map((player) => ({
       player,
       fame: fameByPlayer.get(player.id) ?? 0,
-      explorationDuration: explorationDuration(player)
+      explorationDuration: explorationDuration(player),
     }))
     .sort((a, b) => b.fame - a.fame || a.explorationDuration - b.explorationDuration)
 
@@ -33,18 +33,19 @@ export function rankPlayers(
       previous.explorationDuration === entry.explorationDuration
     const firstMatchingIndex = sorted.findIndex(
       (candidate) =>
-        candidate.fame === entry.fame && candidate.explorationDuration === entry.explorationDuration
+        candidate.fame === entry.fame &&
+        candidate.explorationDuration === entry.explorationDuration,
     )
     const tied = sorted.some(
       (candidate, candidateIndex) =>
         candidateIndex !== index &&
         candidate.fame === entry.fame &&
-        candidate.explorationDuration === entry.explorationDuration
+        candidate.explorationDuration === entry.explorationDuration,
     )
     return {
       ...entry,
       rank: sameAsPrevious ? firstMatchingIndex + 1 : index + 1,
-      tied
+      tied,
     }
   })
 }

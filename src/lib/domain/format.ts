@@ -3,7 +3,7 @@ import type { Biome, CountTarget, Resource } from './cards'
 export const RESOURCE_LABELS: Record<Resource, string> = {
   uddu: 'Uddu',
   okiko: 'Okiko',
-  goldlog: 'Goldlog'
+  goldlog: 'Goldlog',
 }
 
 export const BIOME_LABELS: Record<Biome, string> = {
@@ -11,7 +11,7 @@ export const BIOME_LABELS: Record<Biome, string> = {
   forest: 'Forest',
   river: 'River',
   city: 'City',
-  mysticalHaven: 'Mystical Haven'
+  mysticalHaven: 'Mystical Haven',
 }
 
 export function targetLabel(target: CountTarget): string {

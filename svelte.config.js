@@ -1,4 +1,2 @@
-/** @type {import('svelte/compiler').CompileOptions} */
-const config = {}
-
-export default config
+/** @type {import('@sveltejs/vite-plugin-svelte').SvelteConfig} */
+export default {}

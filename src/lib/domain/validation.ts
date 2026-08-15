@@ -42,12 +42,12 @@ export function validateGameRegions(game: Game, cards: RegionCardLookup): Region
         errors.set(key, {
           type: 'undefined',
           regionId,
-          message: `Region #${regionId} is not defined in the card dataset.`
+          message: `Region #${regionId} is not defined in the card dataset.`,
         })
       } else if (foundGap) {
         errors.set(key, {
           type: 'gap',
-          message: 'Complete the earlier journey position first.'
+          message: 'Complete the earlier journey position first.',
         })
       }
     })
@@ -57,7 +57,8 @@ export function validateGameRegions(game: Game, cards: RegionCardLookup): Region
     if (entries.length < 2) continue
     for (const entry of entries) {
       const other = entries.find(
-        (candidate) => candidate.playerId !== entry.playerId || candidate.position !== entry.position
+        (candidate) =>
+          candidate.playerId !== entry.playerId || candidate.position !== entry.position,
       )!
       errors.set(regionFieldKey(entry.playerId, entry.position), {
         type: 'duplicate',
@@ -66,7 +67,7 @@ export function validateGameRegions(game: Game, cards: RegionCardLookup): Region
         message:
           other.playerId === entry.playerId
             ? `Region #${regionId} is already in ${entry.ownerName}'s journey.`
-            : `Already entered for ${other.ownerName}.`
+            : `Already entered for ${other.ownerName}.`,
       })
     }
   }

@@ -7,7 +7,7 @@ import {
   checkPrerequisite,
   scoreRegion,
   scoreRegionSequence,
-  visibleStateFromSanctuary
+  visibleStateFromSanctuary,
 } from './scoring'
 
 const fixtures = [
@@ -17,7 +17,7 @@ const fixtures = [
     period: 'day',
     clues: 1,
     resources: { uddu: 1 },
-    quest: { type: 'perCount', famePerItem: 2, targets: [{ kind: 'resource', resource: 'uddu' }] }
+    quest: { type: 'perCount', famePerItem: 2, targets: [{ kind: 'resource', resource: 'uddu' }] },
   },
   {
     id: 44,
@@ -26,7 +26,7 @@ const fixtures = [
     clues: 0,
     resources: { okiko: 1 },
     prerequisite: { uddu: 1 },
-    quest: { type: 'perCount', famePerItem: 3, targets: [{ kind: 'night' }] }
+    quest: { type: 'perCount', famePerItem: 3, targets: [{ kind: 'night' }] },
   },
   {
     id: 9,
@@ -40,10 +40,10 @@ const fixtures = [
       members: [
         { kind: 'resource', resource: 'uddu' },
         { kind: 'resource', resource: 'okiko' },
-        { kind: 'resource', resource: 'goldlog' }
-      ]
-    }
-  }
+        { kind: 'resource', resource: 'goldlog' },
+      ],
+    },
+  },
 ] satisfies readonly RegionCardDefinition[]
 
 const lookup = createRegionLookup(fixtures)
@@ -59,7 +59,7 @@ describe('visible state', () => {
       resources: { uddu: 2 },
       biomes: { river: 1 },
       clues: 3,
-      nighttimeCards: 2
+      nighttimeCards: 2,
     })
   })
 
@@ -72,7 +72,7 @@ describe('visible state', () => {
       resources: { uddu: 1, okiko: 1 },
       biomes: { forest: 1, city: 1 },
       clues: 1,
-      nighttimeCards: 1
+      nighttimeCards: 1,
     })
   })
 })
@@ -81,13 +81,16 @@ describe('prerequisites', () => {
   it('succeeds with no prerequisite and with an exact resource match', () => {
     const empty = visibleStateFromSanctuary(createSanctuaryState())
     expect(checkPrerequisite(fixtures[0], empty).satisfied).toBe(true)
-    expect(checkPrerequisite(fixtures[1], { ...empty, resources: { ...empty.resources, uddu: 1 } }).satisfied).toBe(true)
+    expect(
+      checkPrerequisite(fixtures[1], { ...empty, resources: { ...empty.resources, uddu: 1 } })
+        .satisfied,
+    ).toBe(true)
   })
 
   it('reports every requirement and does not consume resources', () => {
     const card: RegionCardDefinition = {
       ...fixtures[0],
-      prerequisite: { uddu: 2, goldlog: 1 }
+      prerequisite: { uddu: 2, goldlog: 1 },
     }
     const state = visibleStateFromSanctuary(createSanctuaryState())
     state.resources.uddu = 2
@@ -95,7 +98,7 @@ describe('prerequisites', () => {
     expect(result.satisfied).toBe(false)
     expect(result.requirements).toEqual([
       { resource: 'uddu', required: 2, visible: 2, satisfied: true },
-      { resource: 'goldlog', required: 1, visible: 0, satisfied: false }
+      { resource: 'goldlog', required: 1, visible: 0, satisfied: false },
     ])
     expect(state.resources.uddu).toBe(2)
     expect(checkPrerequisite(card, state).requirements[0].visible).toBe(2)
@@ -107,7 +110,7 @@ describe('quest calculations', () => {
     resources: { uddu: 3, okiko: 2, goldlog: 1 },
     biomes: { desert: 1, forest: 2, river: 0, city: 2, mysticalHaven: 3 },
     clues: 4,
-    nighttimeCards: 5
+    nighttimeCards: 5,
   }
 
   it('calculates fixed Fame and returns zero when its prerequisite fails', () => {
@@ -115,7 +118,7 @@ describe('quest calculations', () => {
     const card: RegionCardDefinition = {
       ...fixtures[0],
       prerequisite: { goldlog: 2 },
-      quest: { type: 'fixed', fame: 12 }
+      quest: { type: 'fixed', fame: 12 },
     }
     expect(scoreRegion(card, state).fame).toBe(0)
   })
@@ -125,7 +128,7 @@ describe('quest calculations', () => {
     [{ kind: 'clue' } as const, 4],
     [{ kind: 'night' } as const, 5],
     [{ kind: 'biome', biome: 'forest' } as const, 2],
-    [{ kind: 'biome', biome: 'mysticalHaven' } as const, 3]
+    [{ kind: 'biome', biome: 'mysticalHaven' } as const, 3],
   ])('counts %o', (target, count) => {
     const result = calculateQuest({ type: 'perCount', famePerItem: 3, targets: [target] }, state)
     expect(result.fame).toBe(count * 3)
@@ -138,10 +141,10 @@ describe('quest calculations', () => {
         famePerItem: 2,
         targets: [
           { kind: 'biome', biome: 'city' },
-          { kind: 'biome', biome: 'desert' }
-        ]
+          { kind: 'biome', biome: 'desert' },
+        ],
       },
-      state
+      state,
     )
     expect(result.fame).toBe(6)
   })

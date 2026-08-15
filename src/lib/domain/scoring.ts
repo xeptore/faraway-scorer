@@ -6,7 +6,7 @@ import {
   type FameQuest,
   type RegionCardDefinition,
   type RegionCardLookup,
-  type Resource
+  type Resource,
 } from './cards'
 import type { RegionSequence, SanctuaryState } from './game'
 
@@ -76,11 +76,14 @@ export function visibleStateFromSanctuary(sanctuary: SanctuaryState): VisibleSta
     resources: { ...zeroRecord(RESOURCES), ...sanctuary.resources },
     biomes: { ...zeroRecord(BIOMES), ...sanctuary.biomes },
     clues: sanctuary.clues,
-    nighttimeCards: sanctuary.nighttimeCards
+    nighttimeCards: sanctuary.nighttimeCards,
   }
 }
 
-export function addRegionToVisibleState(state: VisibleState, card: RegionCardDefinition): VisibleState {
+export function addRegionToVisibleState(
+  state: VisibleState,
+  card: RegionCardDefinition,
+): VisibleState {
   const resources = { ...state.resources }
   for (const resource of RESOURCES) resources[resource] += card.resources[resource] ?? 0
 
@@ -88,13 +91,13 @@ export function addRegionToVisibleState(state: VisibleState, card: RegionCardDef
     resources,
     biomes: { ...state.biomes, [card.biome]: state.biomes[card.biome] + 1 },
     clues: state.clues + card.clues,
-    nighttimeCards: state.nighttimeCards + (card.period === 'night' ? 1 : 0)
+    nighttimeCards: state.nighttimeCards + (card.period === 'night' ? 1 : 0),
   }
 }
 
 export function checkPrerequisite(
   card: RegionCardDefinition,
-  state: VisibleState
+  state: VisibleState,
 ): PrerequisiteResult {
   if (!card.prerequisite || Object.keys(card.prerequisite).length === 0) {
     return { type: 'none', satisfied: true, requirements: [] }
@@ -110,7 +113,7 @@ export function checkPrerequisite(
   return {
     type: 'resources',
     satisfied: requirements.every((requirement) => requirement.satisfied),
-    requirements
+    requirements,
   }
 }
 
@@ -139,7 +142,7 @@ export function calculateQuest(quest: FameQuest, state: VisibleState): FameCalcu
         famePerItem: quest.famePerItem,
         matches,
         totalCount,
-        fame: totalCount * quest.famePerItem
+        fame: totalCount * quest.famePerItem,
       }
     }
     case 'completeSet': {
@@ -150,13 +153,16 @@ export function calculateQuest(quest: FameQuest, state: VisibleState): FameCalcu
         famePerSet: quest.famePerSet,
         setCount,
         members,
-        fame: setCount * quest.famePerSet
+        fame: setCount * quest.famePerSet,
       }
     }
   }
 }
 
-export function scoreRegion(card: RegionCardDefinition, visibleState: VisibleState): RegionScoreResult {
+export function scoreRegion(
+  card: RegionCardDefinition,
+  visibleState: VisibleState,
+): RegionScoreResult {
   const prerequisite = checkPrerequisite(card, visibleState)
   const calculation = calculateQuest(card.quest, visibleState)
   return {
@@ -164,14 +170,14 @@ export function scoreRegion(card: RegionCardDefinition, visibleState: VisibleSta
     fame: prerequisite.satisfied ? calculation.fame : 0,
     prerequisite,
     calculation,
-    visibleState
+    visibleState,
   }
 }
 
 export function scoreRegionSequence(
   sanctuary: SanctuaryState,
   sequence: RegionSequence,
-  cards: RegionCardLookup
+  cards: RegionCardLookup,
 ): SequenceScore {
   let state = visibleStateFromSanctuary(sanctuary)
   const results: (RegionScoreResult | null)[] = Array(8).fill(null)
@@ -199,6 +205,6 @@ export function scoreRegionSequence(
     totalFame: regionFame + sanctuary.fame,
     scoredCount,
     enteredCount,
-    complete: scoredCount === 8
+    complete: scoredCount === 8,
   }
 }

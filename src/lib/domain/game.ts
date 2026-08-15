@@ -12,7 +12,7 @@ export type RegionSequence = [
   number | null,
   number | null,
   number | null,
-  number | null
+  number | null,
 ]
 
 export interface SanctuaryState {
@@ -47,25 +47,37 @@ export function createSanctuaryState(): SanctuaryState {
     biomes: zeroRecord(BIOMES),
     clues: 0,
     nighttimeCards: 0,
-    fame: 0
+    fame: 0,
   }
 }
 
-export function createPlayer(name: string, id: string = crypto.randomUUID()): Player {
+export function createPlayer(name: string, id: string = createId()): Player {
   return {
     id,
     name: name.trim(),
     sanctuary: createSanctuaryState(),
-    regions: [null, null, null, null, null, null, null, null]
+    regions: [null, null, null, null, null, null, null, null],
   }
 }
 
-export function createGame(names: readonly string[], id: string = crypto.randomUUID()): Game {
-  const players = names.map((name) => createPlayer(name))
+export function createGame(names: readonly string[], id: string = createId()): Game {
+  const cleanedNames = names.map((name) => name.trim()).filter(Boolean)
+  if (cleanedNames.length < MIN_PLAYERS || cleanedNames.length > MAX_PLAYERS) {
+    throw new Error(`A game needs ${MIN_PLAYERS} to ${MAX_PLAYERS} players.`)
+  }
+  if (new Set(cleanedNames.map((name) => name.toLocaleLowerCase())).size !== cleanedNames.length) {
+    throw new Error('Player names must be unique.')
+  }
+
+  const players = cleanedNames.map((name) => createPlayer(name))
   return {
     id,
     players,
     activePlayerId: players[0]?.id ?? null,
-    screen: 'scoring'
+    screen: 'scoring',
   }
+}
+
+function createId(): string {
+  return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`
 }

@@ -1,7 +1,6 @@
 <script lang="ts">
   import Counter from './lib/components/Counter.svelte'
   import RegionDetails from './lib/components/RegionDetails.svelte'
-  import UpdatePrompt from './lib/components/UpdatePrompt.svelte'
   import { BIOMES, createRegionLookup, RESOURCES } from './lib/domain/cards'
   import { BIOME_LABELS, RESOURCE_LABELS } from './lib/domain/format'
   import {
@@ -18,10 +17,12 @@
   import { parseRegionInput, regionFieldKey, validateGameRegions } from './lib/domain/validation'
   import { REGION_CARDS } from './lib/data/regions'
   import { clearGame, loadGame, saveGame } from './lib/persistence'
-  import { tick } from 'svelte'
+  import { onMount, tick } from 'svelte'
+  import { registerSW } from 'virtual:pwa-register'
 
   const cardLookup = createRegionLookup(REGION_CARDS)
   const restoredGame = loadGame()
+  const appIcon = `${import.meta.env.BASE_URL}icon-192x192.png`
 
   interface SetupPlayer {
     id: string
@@ -54,6 +55,22 @@
   let selectedDetail: { result: RegionScoreResult; position: number } | null = $state(null)
   let standingsCloseButton = $state<HTMLButtonElement>()
   let confirmCancelButton = $state<HTMLButtonElement>()
+  let updateAvailable = $state(false)
+  let offlineReady = $state(false)
+  let updateServiceWorker = $state<(reloadPage?: boolean) => Promise<void>>(async () => {})
+
+  onMount(() => {
+    updateServiceWorker = registerSW({
+      immediate: true,
+      onNeedRefresh() {
+        updateAvailable = true
+      },
+      onOfflineReady() {
+        offlineReady = true
+        window.setTimeout(() => (offlineReady = false), 5000)
+      }
+    })
+  })
 
   const validationErrors = $derived(game ? validateGameRegions(game, cardLookup) : new Map())
   const scores = $derived.by(() => {
@@ -126,6 +143,11 @@
     view = 'setup'
   }
 
+  async function applyUpdate(): Promise<void> {
+    if (game) saveGame(game)
+    await updateServiceWorker(true)
+  }
+
   function selectPlayer(playerId: string): void {
     if (!game) return
     game.activePlayerId = playerId
@@ -177,7 +199,7 @@
 {#if view === 'resume' && game}
   <main class="start-shell">
     <section class="start-card">
-      <img class="brand-mark" src="/icon-192x192.png" alt="" width="62" height="62" />
+      <img class="brand-mark" src={appIcon} alt="" width="62" height="62" />
       <p class="eyebrow">Faraway scorekeeper</p>
       <h1>Your return journey is waiting.</h1>
       <p class="intro">Continue where you left off, with every Region and Sanctuary saved on this device.</p>
@@ -193,7 +215,7 @@
 {:else if view === 'setup'}
   <main class="start-shell">
     <section class="start-card setup-card">
-      <img class="brand-mark" src="/icon-192x192.png" alt="" width="62" height="62" />
+      <img class="brand-mark" src={appIcon} alt="" width="62" height="62" />
       <p class="eyebrow">New game</p>
       <h1>Who made the journey?</h1>
       <p class="intro">Add 2–7 explorers. You can switch between them freely while scoring.</p>
@@ -226,7 +248,7 @@
 {:else if game && game.screen === 'results'}
   <main class="results-shell">
     <header class="app-header simple-header">
-      <div class="mini-brand"><img src="/icon-192x192.png" alt="" />Faraway</div>
+      <div class="mini-brand"><img src={appIcon} alt="" />Faraway</div>
       <button class="header-action" type="button" onclick={requestNewGame}>New game</button>
     </header>
     <section class="results-card">
@@ -249,7 +271,7 @@
 {:else if game && activePlayer && activeScore}
   <div class="score-app">
     <header class="app-header">
-      <div class="mini-brand"><img src="/icon-192x192.png" alt="" />Faraway</div>
+      <div class="mini-brand"><img src={appIcon} alt="" />Faraway</div>
       <div class="header-score"><span>{activeScore.complete ? 'Total fame' : 'Current fame'}</span><strong>{activeScore.totalFame}</strong></div>
       <button class="menu-button" type="button" aria-label="Start a new game" onclick={requestNewGame}>•••</button>
     </header>
@@ -398,4 +420,13 @@
   </div>
 {/if}
 
-<UpdatePrompt onBeforeUpdate={() => game && saveGame(game)} />
+{#if updateAvailable}
+  <aside class="update-toast" aria-live="polite">
+    <div><strong>Update available</strong><span>A fresh version is ready.</span></div>
+    <button type="button" onclick={applyUpdate}>Update</button>
+  </aside>
+{:else if offlineReady}
+  <aside class="update-toast" role="status">
+    <div><strong>Ready offline</strong><span>This scorekeeper will work without a connection.</span></div>
+  </aside>
+{/if}

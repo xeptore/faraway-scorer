@@ -3,13 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "^12.4.0",
-      "onFail": "download"
-    }
-  },
+  "packageManager": "pnpm@12.3.4",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

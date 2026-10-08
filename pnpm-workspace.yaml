@@ -1,3 +1,5 @@
 allowBuilds:
   esbuild: true
   node: true
+minimumReleaseAgeExclude:
+  - node@26.11.1
